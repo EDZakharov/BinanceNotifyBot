@@ -1,4 +1,3 @@
 # BinanceNotifyBot
 
-*Бот веден статистику торгов другого бота в паре BUSD/TWT*
-[Ссылка на бота](https://t.me/CryptostatusMarketBot "Телеграм бот")
+*[Бот](https://t.me/CryptostatusMarketBot "Телеграм бот") ведет статистику торгов другого бота в паре BUSD/TWT*
