@@ -1,2 +1,3 @@
 # BinanceNotifyBot
-Telegram -> @CryptostatusMarketBot
+ -> 
+[Telegram BOT](https://t.me/CryptostatusMarketBot "Телеграм бот")
