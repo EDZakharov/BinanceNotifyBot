@@ -8,7 +8,6 @@ import * as dotenv from 'dotenv'
 
 dotenv.config()
 
-const exchange = new binance()
 // const ticker = await exchange.fetchTicker('BTC/USDT')
 // const orders = await exchange.fetchOrderBook('TON/USDT', 20)
 // const ordersBook = {
@@ -77,24 +76,27 @@ bot.help((ctx) => ctx.reply('Send me a sticker'))
 bot.on(message('sticker'), (ctx) => ctx.reply('👍'))
 
 bot.hears('Показать курс', async (ctx) => {
-  const orderbook = await exchange.fetchOrderBook('TWT/BUSD', 20)
-  const bid = orderbook.bids.length ? orderbook.bids[0][0] : undefined
-  const ask = orderbook.asks.length ? orderbook.asks[0][0] : undefined
-  const spread = bid && ask ? ask - bid : undefined
-  const date = new Date()
-
-  console.log('Запрос: Показать курс')
-  ctx.reply(
-    ` \u{1F4B0}${exchange.id.toUpperCase()} -> торговая пара -> TWT/BUSD\nТекущая дата: ${new Intl.DateTimeFormat().format(
-      date
-    )}\nТекущее время: ${`${date.getHours()}:${
-      date.getMinutes() < 10 ? `0${date.getMinutes()}` : date.getMinutes()
-    }`}\n| Цена продажи -> ${ask.toFixed(
-      4
-    )} \u{1F4B2} \n| Цена покупки -> ${bid.toFixed(
-      4
-    )} \u{1F4B2} \n| Дельта -> ${spread.toFixed(4)} \u{1F4B2}`
-  )
+  try {
+    const exchange = new binance()
+    const orderbook = await exchange.fetchOrderBook('TWT/BUSD', 20)
+    const bid = orderbook.bids.length ? orderbook.bids[0][0] : undefined
+    const ask = orderbook.asks.length ? orderbook.asks[0][0] : undefined
+    const spread = bid && ask ? ask - bid : undefined
+    const date = new Date()
+    ctx.reply(
+      ` \u{1F4B0}${exchange.id.toUpperCase()} -> торговая пара -> TWT/BUSD\nТекущая дата: ${new Intl.DateTimeFormat().format(
+        date
+      )}\nТекущее время: ${`${date.getHours()}:${
+        date.getMinutes() < 10 ? `0${date.getMinutes()}` : date.getMinutes()
+      }`}\n| Цена продажи -> ${ask.toFixed(
+        4
+      )} \u{1F4B2} \n| Цена покупки -> ${bid.toFixed(
+        4
+      )} \u{1F4B2} \n| Дельта -> ${spread.toFixed(4)} \u{1F4B2}`
+    )
+  } catch (e) {
+    ctx.reply(` Something went wrong!`)
+  }
 })
 
 bot.hears('Показать сделки', async (ctx) => {
