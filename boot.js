@@ -5,6 +5,7 @@ import { message } from 'telegraf/filters'
 import { binance } from 'ccxt'
 import { API } from '3commas-typescript'
 import * as dotenv from 'dotenv'
+import axios from 'axios'
 // import WebSocket from 'ws'
 dotenv.config()
 const bot = new Telegraf(process.env.TELEGRAF_TOKEN)
@@ -113,27 +114,9 @@ bot.help((ctx) => ctx.reply('Send me a sticker'))
 bot.on(message('sticker'), (ctx) => ctx.reply('👍'))
 
 bot.hears('Показать курс', async (ctx) => {
-  try {
-    const exchange = new binance()
-    const orderbook = await exchange.fetchOrderBook('TWT/BUSD', 20)
-    const bid = orderbook.bids.length ? orderbook.bids[0][0] : undefined
-    const ask = orderbook.asks.length ? orderbook.asks[0][0] : undefined
-    const spread = bid && ask ? ask - bid : undefined
-    const date = new Date()
-    ctx.reply(
-      ` \u{1F4B0}${exchange.id.toUpperCase()} -> торговая пара -> TWT/BUSD\nТекущая дата: ${new Intl.DateTimeFormat().format(
-        date
-      )}\nТекущее время: ${`${date.getHours()}:${
-        date.getMinutes() < 10 ? `0${date.getMinutes()}` : date.getMinutes()
-      }`}\n| Цена продажи -> ${ask.toFixed(
-        4
-      )} \u{1F4B2} \n| Цена покупки -> ${bid.toFixed(
-        4
-      )} \u{1F4B2} \n| Дельта -> ${spread.toFixed(4)} \u{1F4B2}`
-    )
-  } catch (e) {
-    ctx.reply(` Something went wrong!`)
-  }
+  let datas = axios
+    .get(`https://api.kaspa.org/info/price`)
+    .then((data) => ctx.reply(`Цена kaspa: ${data.data.price} \u{1F4B2}`))
 })
 
 bot.hears('Показать сделки', async (ctx) => {
