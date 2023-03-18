@@ -5,15 +5,9 @@ import { message } from 'telegraf/filters'
 import { binance } from 'ccxt'
 import { API } from '3commas-typescript'
 import * as dotenv from 'dotenv'
-
+// import WebSocket from 'ws'
 dotenv.config()
-
-// const ticker = await exchange.fetchTicker('BTC/USDT')
-// const orders = await exchange.fetchOrderBook('TON/USDT', 20)
-// const ordersBook = {
-//   ASKS: orders.asks.reverse(),
-//   BIDS: orders.bids,
-// }
+const bot = new Telegraf(process.env.TELEGRAF_TOKEN)
 
 const api = new API({
   key: process.env.PUBLIC_KEY, // Optional if only query endpoints with no security requirement
@@ -26,6 +20,15 @@ const api = new API({
     reject(new Error(error_description ?? error))
   },
 })
+
+// const wsServer = new WebSocket.Server({ port: 9000 })
+// wsServer.on('connection', onConnect)
+// const ticker = await exchange.fetchTicker('BTC/USDT')
+// const orders = await exchange.fetchOrderBook('TON/USDT', 20)
+// const ordersBook = {
+//   ASKS: orders.asks.reverse(),
+//   BIDS: orders.bids,
+// }
 
 const getBotDeals = async () => {
   const deals = await api.getDeals()
@@ -70,8 +73,42 @@ const menu = Markup.keyboard([
   ['Показать курс', 'Показать сделки', 'Статистика бота'],
 ]).resize(true)
 
-const bot = new Telegraf('6112029454:AAGEEwf4d__zPg7s_7TXV9eBuivOkmYO88I')
-bot.start((ctx) => ctx.reply('Welcome', menu))
+bot.start((ctx) => {
+  api.subscribeDeal((data) => {
+    const parse_data = JSON.parse(data)
+    const bot_message = parse_data?.message
+    if (bot_message?.type === 'Deal') {
+      console.log(bot_message)
+      ctx.reply(
+        `\u{1F4B0} BOT: ${bot_message.bot_name}\nID сделки: ${
+          bot_message.id
+        }\nПара: ${bot_message.pair}\n\u{1F4B2}\u{1F4B2} Профит: ${
+          bot_message.usd_final_profit
+        } USD\nТекущий статус: ${
+          bot_message.localized_status === 'Активна'
+            ? '\u{2705} Активна'
+            : '\u{274C} Закрыта'
+        }\nСоздана: ${bot_message.created_at?.split('T')[0]} // ${
+          bot_message.created_at?.split('T')[1].split('.')[0]
+        }\nЗакрыта: ${bot_message.closed_at?.split('T')[0]} // ${
+          bot_message.closed_at?.split('T')[1].split('.')[0]
+        }\nЦена покупки: ${bot_message.bought_average_price.substr(0, 6)} ${
+          bot_message.from_currency
+        }\nКуплено: ${bot_message.bought_amount} ${
+          bot_message.to_currency
+        }\nПотрачено: ${bot_message.bought_volume} ${
+          bot_message.from_currency
+        }\nСООБЩЕНИЯ БОТА:\n ${bot_message.bot_events.map(
+          (el) =>
+            `\n\n\u{2705} ${el.message} \n\u{231A} Дата: ${
+              el.created_at.split('T')[0]
+            } // ${el.created_at.split('T')[1].split('.')[0]}`
+        )}`,
+        menu
+      )
+    }
+  })
+})
 bot.help((ctx) => ctx.reply('Send me a sticker'))
 bot.on(message('sticker'), (ctx) => ctx.reply('👍'))
 
