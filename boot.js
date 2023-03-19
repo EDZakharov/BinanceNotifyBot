@@ -99,7 +99,7 @@ bot.start((ctx) => {
           bot_message.to_currency
         }\nПотрачено: ${bot_message.bought_volume} ${
           bot_message.from_currency
-        }\nСООБЩЕНИЯ БОТА:\n ${bot_message.bot_events.map(
+        }\nИСТОРИЯ ОПЕРАЦИЙ:\n ${bot_message.bot_events.map(
           (el) =>
             `\n\n\u{2705} ${el.message} \n\u{231A} Дата: ${
               el.created_at.split('T')[0]
